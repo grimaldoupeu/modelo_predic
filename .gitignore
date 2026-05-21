@@ -1,0 +1,61 @@
+# Entorno virtual
+venv/
+env/
+ENV/
+.venv
+
+# Archivos de caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# Archivos de Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# Archivos de salida/generados
+*.pkl
+static/charts/
+*.png
+*.pdf
+
+# Archivos temporales
+*.tmp
+*.log
+.env
+.env.local
+
+# Directorio de datos (opcional si son muy grandes)
+# data/
+
+# Archivos de configuración local
+config.local.py
+settings.local.py

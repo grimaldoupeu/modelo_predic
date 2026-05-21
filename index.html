@@ -152,6 +152,29 @@
             color: #818cf8;
         }
 
+        .subject-selector {
+            padding: 1.25rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 0.5rem;
+        }
+
+        .selector-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .selector-label i {
+            color: var(--accent-primary);
+            font-size: 0.85rem;
+        }
+
         .sidebar-footer {
             margin-top: auto;
             padding: 1.25rem;
@@ -712,6 +735,18 @@
             </div>
         </div>
 
+        <!-- SUBJECT SELECTOR -->
+        <div class="subject-selector">
+            <label class="selector-label">
+                <i class="fa-solid fa-book-open"></i>
+                Materia de Análisis
+            </label>
+            <select id="materia-select" class="form-control" onchange="switchMateria(this.value)">
+                <option value="mat">Matemáticas</option>
+                <option value="por">Portugués</option>
+            </select>
+        </div>
+
         <ul class="nav-menu">
             <li class="nav-item">
                 <a class="nav-link active" onclick="switchTab('dashboard')">
@@ -771,8 +806,8 @@
             <div class="grid-3">
                 <div class="stat-card">
                     <div class="stat-info">
-                        <h3>Muestra Total Active</h3>
-                        <p>357</p>
+                        <h3>Muestra Total Activa</h3>
+                        <p id="stat-active">357</p>
                         <span>Estudiantes regulares</span>
                     </div>
                     <div class="stat-icon">
@@ -782,8 +817,8 @@
                 <div class="stat-card">
                     <div class="stat-info">
                         <h3>Tasa de Aprobación</h3>
-                        <p>74.2%</p>
-                        <span>265 Estudiantes activos</span>
+                        <p id="stat-tasa">74.2%</p>
+                        <span id="stat-aprobados-count">265 aprobados</span>
                     </div>
                     <div class="stat-icon" style="color: var(--success);">
                         <i class="fa-solid fa-circle-check"></i>
@@ -792,7 +827,7 @@
                 <div class="stat-card">
                     <div class="stat-info">
                         <h3>Deserción / Abandono</h3>
-                        <p>38</p>
+                        <p id="stat-desertion">38</p>
                         <span>G3 = 0 (Excluidos de ML)</span>
                     </div>
                     <div class="stat-icon" style="color: var(--danger);">
@@ -806,7 +841,7 @@
                     <h3><i class="fa-solid fa-circle-info"></i> Resumen de Negocio y Metodológico</h3>
                 </div>
                 <p class="desc">
-                    El sistema analiza el rendimiento de los estudiantes en la materia de <strong>Matemáticas</strong> basándose en características socioeconómicas, hábitos personales (tiempo de estudio, consumo de alcohol, salidas con amigos) y entorno familiar. Con un enfoque predictivo y de segmentación, este dashboard permite responder a dos preguntas fundamentales:
+                    El sistema analiza el rendimiento de los estudiantes en la materia de <strong id="subject-name-ref">Matemáticas</strong> basándose en características socioeconómicas, hábitos personales (tiempo de estudio, consumo de alcohol, salidas con amigos) y entorno familiar. Con un enfoque predictivo y de segmentación, este dashboard permite responder a dos preguntas fundamentales:
                 </p>
                 <ul class="list-details">
                     <li><strong>¿Qué caracteriza a los distintos grupos de estudiantes en el campus?</strong> Respondido en la sección de Segmentación con algoritmos de clustering (K-Means y Jerárquico).</li>
@@ -842,12 +877,12 @@
                         </div>
                         <ul class="list-details danger-list">
                             <li><strong>Error común en exámenes:</strong> Mezclar archivos sin agrupar por ID de estudiante, lo que invalida científicamente el análisis.</li>
-                            <li><strong>Solución Implementada:</strong> Modelado estricto e independiente del dataset de Matemáticas para garantizar particiones completamente limpias e imparciales.</li>
+                            <li><strong>Solución Implementada:</strong> Modelado estricto e independiente de cada dataset (<strong id="leakage-sol-subject">Matemáticas</strong> y Portugués) para garantizar particiones completamente limpias e imparciales.</li>
                         </ul>
                     </div>
                     <div class="flex-col" style="max-width: 450px;">
                         <div class="chart-container">
-                            <img src="/static/charts/01_distribucion.png" class="chart-img" alt="Distribución de Notas">
+                            <img id="chart-distribucion" src="/static/charts/01_distribucion_mat.png" class="chart-img" alt="Distribución de Notas" data-base="01_distribucion">
                         </div>
                     </div>
                 </div>
@@ -858,7 +893,7 @@
                     <h3><i class="fa-solid fa-power-off"></i> Hallazgo Crítico 2: Análisis y Tratamiento de Notas G3 = 0 (Deserción Escolar)</h3>
                 </div>
                 <p class="desc">
-                    El dataset de Matemáticas contiene <strong>38 estudiantes con calificación final G3 = 0</strong>. Al analizar a fondo estas notas mediante minería de datos, encontramos un patrón inequívoco:
+                    El dataset de <strong id="leakage-subject-name">Matemáticas</strong> contiene <strong>38 estudiantes con calificación final G3 = 0</strong>. Al analizar a fondo estas notas mediante minería de datos, encontramos un patrón inequívoco:
                 </p>
                 <div class="table-responsive">
                     <table>
@@ -911,7 +946,7 @@
                         <li><strong>Dendrograma Jerárquico:</strong> Usando enlace Ward, el dendrograma muestra un corte ideal en K = 2, ratificando la solidez de la segmentación.</li>
                     </ul>
                     <div class="chart-container">
-                        <img src="/static/charts/02_codo_silhouette.png" class="chart-img" alt="Codo y Silhouette">
+                        <img id="chart-codo" src="/static/charts/02_codo_silhouette_mat.png" class="chart-img" alt="Codo y Silhouette" data-base="02_codo_silhouette">
                     </div>
                 </div>
 
@@ -923,7 +958,7 @@
                         El dendrograma jerárquico representa las distancias de Ward entre las observaciones. Confirma la división del alumnado en dos macro-perfiles definidos.
                     </p>
                     <div class="chart-container" style="margin-top: 2rem;">
-                        <img src="/static/charts/03_dendrograma.png" class="chart-img" alt="Dendrograma">
+                        <img id="chart-dendrograma" src="/static/charts/03_dendrograma_mat.png" class="chart-img" alt="Dendrograma" data-base="03_dendrograma">
                     </div>
                 </div>
             </div>
@@ -977,7 +1012,7 @@
                 </div>
 
                 <div class="chart-container" style="margin-top: 2rem;">
-                    <img src="/static/charts/04_perfiles.png" class="chart-img" alt="Mapa de Calor de Perfiles">
+                    <img id="chart-perfiles" src="/static/charts/04_perfiles_mat.png" class="chart-img" alt="Mapa de Calor de Perfiles" data-base="04_perfiles">
                 </div>
             </div>
         </div>
@@ -1044,7 +1079,7 @@
                         <h3><i class="fa-solid fa-chart-line"></i> Curva ROC Comparativa en Test</h3>
                     </div>
                     <div class="chart-container">
-                        <img src="/static/charts/07_curva_roc.png" class="chart-img" alt="Curva ROC">
+                        <img id="chart-roc" src="/static/charts/07_curva_roc_mat.png" class="chart-img" alt="Curva ROC" data-base="07_curva_roc">
                     </div>
                 </div>
 
@@ -1053,10 +1088,10 @@
                         <h3><i class="fa-solid fa-ranking-star"></i> Importancia de Características (Top 12)</h3>
                     </div>
                     <p class="desc" style="font-size: 0.9rem;">
-                        Variables de mayor peso según Random Forest para la predicción de aprobación matemática:
+                        Variables de mayor peso según Random Forest para la predicción de aprobación en <strong id="clasif-subject-name">Matemáticas</strong>:
                     </p>
                     <div class="chart-container">
-                        <img src="/static/charts/06_importancia_features.png" class="chart-img" alt="Importancia de Variables">
+                        <img id="chart-importancia" src="/static/charts/06_importancia_features_mat.png" class="chart-img" alt="Importancia de Variables" data-base="06_importancia_features">
                     </div>
                 </div>
             </div>
@@ -1069,7 +1104,7 @@
                     Visualización de los aciertos y tipos de errores cometidos por cada modelo en el conjunto de prueba (Test):
                 </p>
                 <div class="chart-container">
-                    <img src="/static/charts/08_matrices_confusion.png" class="chart-img" alt="Matrices de Confusión">
+                    <img id="chart-matrices" src="/static/charts/08_matrices_confusion_mat.png" class="chart-img" alt="Matrices de Confusión" data-base="08_matrices_confusion">
                 </div>
                 <div style="margin-top: 1.5rem; line-height: 1.6; font-size: 0.95rem; color: var(--text-secondary);">
                     <p><strong>Explicación gerencial de la Matriz de Random Forest:</strong></p>
@@ -1092,7 +1127,7 @@
                     <h3><i class="fa-solid fa-calculator"></i> Simulador de Alerta Temprana de Rendimiento Estudiantil</h3>
                 </div>
                 <p class="desc">
-                    Introduce los hábitos y características de un estudiante regular. El modelo óptimo entrenado (Random Forest) analizará sus datos en tiempo real y estimará la probabilidad de aprobación en la asignatura de Matemáticas.
+                    Introduce los hábitos y características de un estudiante regular. El modelo óptimo entrenado (Random Forest) analizará sus datos en tiempo real y estimará la probabilidad de aprobación en la asignatura de <strong id="pred-subject-name">Matemáticas</strong>.
                 </p>
 
                 <form id="predictor-form" onsubmit="submitPrediction(event)">
@@ -1238,20 +1273,23 @@
 
     <!-- MAIN APP JAVASCRIPT -->
     <script>
+        let currentMateria = 'mat';
+
+        function getMateriaNombre(materia) {
+            return materia === 'mat' ? 'Matemáticas' : 'Portugués';
+        }
+
         function switchTab(tabId) {
-            // Activar enlace en Sidebar
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.classList.remove('active');
             });
             event.currentTarget.classList.add('active');
 
-            // Activar Tab Panel
             document.querySelectorAll('.tab-panel').forEach(panel => {
                 panel.classList.remove('active');
             });
             document.getElementById(tabId).classList.add('active');
 
-            // Actualizar Título de Cabecera
             const titles = {
                 'dashboard': ['Dashboard de Rendimiento', 'Monitoreo general de datos y métricas académicas de la Unidad 2.'],
                 'leakage': ['Data Leakage & Deserción', 'Estudio analítico de estudiantes en común y notas G3 = 0.'],
@@ -1264,11 +1302,79 @@
             document.getElementById('page-subtitle').innerText = titles[tabId][1];
         }
 
+        async function switchMateria(materia) {
+            currentMateria = materia;
+            document.getElementById('materia-select').value = materia;
+
+            await updateMetrics(materia);
+            updateTexts(materia);
+            updateCharts(materia);
+            resetPrediction();
+        }
+
+        async function updateMetrics(materia) {
+            try {
+                const res = await fetch(`/api/metrics/${materia}`);
+                if (!res.ok) throw new Error('Error al obtener métricas');
+                const data = await res.json();
+
+                const activeEl = document.getElementById('stat-active');
+                const tasaEl = document.getElementById('stat-tasa');
+                const aprobadosEl = document.getElementById('stat-aprobados-count');
+                const desertionEl = document.getElementById('stat-desertion');
+
+                if (activeEl) activeEl.innerText = data.active;
+                if (tasaEl) tasaEl.innerText = data.tasa_aprobacion + '%';
+                if (aprobadosEl) aprobadosEl.innerText = data.aprobados + ' aprobados';
+                if (desertionEl) desertionEl.innerText = data.desertion;
+            } catch (e) {
+                console.error('Error fetching metrics:', e);
+            }
+        }
+
+        function updateTexts(materia) {
+            const nombre = getMateriaNombre(materia);
+
+            const subjectRef = document.getElementById('subject-name-ref');
+            if (subjectRef) subjectRef.innerText = nombre;
+
+            const predSubject = document.getElementById('pred-subject-name');
+            if (predSubject) predSubject.innerText = nombre;
+
+            const clasifSubject = document.getElementById('clasif-subject-name');
+            if (clasifSubject) clasifSubject.innerText = nombre;
+
+            const leakageSubject = document.getElementById('leakage-subject-name');
+            if (leakageSubject) leakageSubject.innerText = nombre;
+
+            const leakageSol = document.getElementById('leakage-sol-subject');
+            if (leakageSol) leakageSol.innerText = nombre;
+        }
+
+        function updateCharts(materia) {
+            const chartImages = document.querySelectorAll('.chart-img[data-base]');
+            chartImages.forEach(img => {
+                const base = img.getAttribute('data-base');
+                img.src = `/static/charts/${base}_${materia}.png`;
+            });
+        }
+
+        function resetPrediction() {
+            const resultContainer = document.getElementById('prediction-result');
+            if (resultContainer) {
+                resultContainer.style.display = 'none';
+            }
+            document.getElementById('prob-aprobado-fill').style.width = '0%';
+            document.getElementById('prob-reprobado-fill').style.width = '0%';
+            document.getElementById('prob-aprobado-label').innerText = 'Aprobación: 0%';
+            document.getElementById('prob-reprobado-label').innerText = 'Reprobación: 0%';
+        }
+
         async function submitPrediction(event) {
             event.preventDefault();
 
-            // Recopilar valores del formulario
             const payload = {
+                materia: currentMateria,
                 failures: parseFloat(document.getElementById('failures').value),
                 studytime: parseFloat(document.getElementById('studytime').value),
                 absences: parseFloat(document.getElementById('absences').value),
@@ -1281,7 +1387,6 @@
                 schoolsup: parseFloat(document.getElementById('schoolsup').value),
                 famsup: parseFloat(document.getElementById('famsup').value),
                 internet: parseFloat(document.getElementById('internet').value),
-                // Valores constantes por defecto para el resto de features para no agobiar en la UI
                 age: 16.0,
                 traveltime: 1.0,
                 paid: 0.0,
@@ -1317,11 +1422,9 @@
 
                 const result = await response.json();
 
-                // Mostrar contenedor
                 const resultContainer = document.getElementById('prediction-result');
                 resultContainer.style.display = 'block';
 
-                // Rellenar cabecera según predicción
                 const header = document.getElementById('result-header');
                 const textContainer = document.getElementById('result-text');
 
@@ -1331,16 +1434,17 @@
                 document.getElementById('prob-aprobado-label').innerText = `Aprobación: ${percentAprobado}%`;
                 document.getElementById('prob-reprobado-label').innerText = `Reprobación: ${percentReprobado}%`;
 
-                // Animación de barra
                 document.getElementById('prob-aprobado-fill').style.width = `${percentAprobado}%`;
                 document.getElementById('prob-reprobado-fill').style.width = `${percentReprobado}%`;
+
+                const materiaNombre = result.materia || getMateriaNombre(currentMateria);
 
                 if (result.prediction === 1) {
                     header.className = 'result-header success';
                     header.innerHTML = '<i class="fa-solid fa-circle-check"></i> DIAGNÓSTICO: ESTUDIANTE APROBADO';
                     textContainer.innerHTML = `
                         El modelo predice con un <strong>${percentAprobado}%</strong> de probabilidad que el estudiante 
-                        <strong>APROBARÁ</strong> el examen final de matemáticas.<br>
+                        <strong>APROBARÁ</strong> el examen final de ${materiaNombre.toLowerCase()}.<br>
                         <span style="font-size: 0.85rem; color: var(--text-muted)">
                             Sus hábitos y entorno familiar demuestran factores protectores que apoyan su aprendizaje regular.
                         </span>
@@ -1350,7 +1454,7 @@
                     header.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> DIAGNÓSTICO: ALUMNO EN RIESGO';
                     textContainer.innerHTML = `
                         El modelo predice con un <strong>${percentReprobado}%</strong> de probabilidad que el estudiante 
-                        está en <strong>RIESGO DE REPROBACIÓN</strong>.<br>
+                        está en <strong>RIESGO DE REPROBACIÓN</strong> en ${materiaNombre.toLowerCase()}.<br>
                         <span style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-top: 0.5rem;">
                             Se recomienda una intervención escolar preventiva. Los factores de riesgo identificados 
                             (por ejemplo, historial de reprobaciones, inasistencias o bajo tiempo de estudio) comprometen su desempeño.
@@ -1358,7 +1462,6 @@
                     `;
                 }
 
-                // Scroll suave al resultado
                 resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
             } catch (error) {
