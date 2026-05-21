@@ -221,19 +221,3 @@ jupyter notebook examen_estudiantes.ipynb
 | **Matplotlib/Seaborn** | Visualización |
 | **Joblib** | Serialización de modelos |
 | **HTML/CSS** | Frontend interactivo |
-
-## 📝 Licencia
-
-Este proyecto es de uso educativo.
-
-## 👨‍💻 Autor
-
-Proyecto de Examen - Minería de Datos Unidad 2
-
-## 📞 Contacto
-
-Para preguntas o sugerencias sobre el proyecto, crea un issue en el repositorio.
-
----
-
-**Status**: ✅ Sistema Activo | **Última actualización**: 2024 | **Versión**: 1.0
