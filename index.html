@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Predicción y Análisis Estudiantil - Minería de Datos</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #121829;
+            --bg-glass: rgba(18, 24, 41, 0.7);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --accent-primary: #6366f1; /* Indigo */
+            --accent-secondary: #06b6d4; /* Cian */
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        /* SIDEBAR STYLE */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-glass);
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--accent-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .logo-text h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            width: 100%;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1.25rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 550;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.05);
+        }
+
+        .nav-link i {
+            font-size: 1.15rem;
+            transition: var(--transition-smooth);
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-link.active i {
+            color: #818cf8;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* MAIN CONTENT AREA */
+        .main-content {
+            margin-left: 280px;
+            flex-grow: 1;
+            padding: 2.5rem 3.5rem;
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header-title h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 0.25rem;
+        }
+
+        .badge-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-active::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        /* TAB PANEL CONTAINER */
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* GRID LAYOUTS & CARDS */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.75rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: 18px;
+            padding: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition-smooth);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.25);
+        }
+
+        .stat-info h3 {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-info p {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-info span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--accent-secondary);
+        }
+
+        /* DETAILED CARDS */
+        .card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 2.25rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .card-header {
+            margin-bottom: 1.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 1rem;
+        }
+
+        .card-header h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-header h3 i {
+            color: var(--accent-primary);
+        }
+
+        .alert-box {
+            padding: 1.25rem 1.5rem;
+            border-radius: 14px;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .alert-danger i {
+            color: var(--danger);
+            font-size: 1.25rem;
+            margin-top: 0.15rem;
+        }
+
+        .alert-info {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: #c7d2fe;
+        }
+
+        .alert-info i {
+            color: #818cf8;
+            font-size: 1.25rem;
+            margin-top: 0.15rem;
+        }
+
+        /* TEXT AND LAYOUT STYLING */
+        p.desc {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+
+        ul.list-details {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        ul.list-details li {
+            position: relative;
+            padding-left: 1.75rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        ul.list-details li::before {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--success);
+        }
+
+        ul.list-details.danger-list li::before {
+            content: "\f00d";
+            color: var(--danger);
+        }
+
+        /* IMAGE GALLERIES & CHARTS */
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            margin: 1.5rem 0;
+        }
+
+        .chart-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            transition: var(--transition-smooth);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .chart-img:hover {
+            transform: scale(1.015);
+        }
+
+        .flex-container {
+            display: flex;
+            gap: 2rem;
+            align-items: stretch;
+        }
+
+        .flex-col {
+            flex: 1;
+        }
+
+        /* TABLES */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1.15rem 1.5rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+            color: white;
+        }
+
+        /* FORM & INPUT CONTROLS */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-glass);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition-smooth);
+            width: 100%;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-primary);
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+        }
+
+        select.form-control option {
+            background-color: var(--bg-secondary);
+            color: white;
+        }
+
+        .btn-submit {
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* PREDICTION RESULT CARD */
+        .result-container {
+            margin-top: 2rem;
+            border-radius: 16px;
+            overflow: hidden;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .result-header {
+            padding: 1.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .result-header.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border-bottom: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .result-header.danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border-bottom: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .result-body {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+        }
+
+        .prob-bar-container {
+            margin-top: 1rem;
+        }
+
+        .prob-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .prob-track {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .prob-fill-aprobado {
+            background-color: var(--success);
+            height: 100%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .prob-fill-reprobado {
+            background-color: var(--danger);
+            height: 100%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .result-summary-text {
+            margin-top: 1.5rem;
+            text-align: center;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        .result-summary-text strong {
+            color: white;
+            font-size: 1.15rem;
+        }
+
+        /* CLUSTER PROFILES GRID */
+        .profiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            padding: 1.5rem;
+            transition: var(--transition-smooth);
+        }
+
+        .profile-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .profile-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .profile-title.p1 i { color: var(--accent-secondary); }
+        .profile-title.p2 i { color: var(--success); }
+
+        .profile-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .profile-stat-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.04);
+            padding-bottom: 0.35rem;
+        }
+
+        .profile-stat-item span:last-child {
+            font-weight: 600;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div class="logo-text">
+                <h1>Rendimiento U2</h1>
+                <p>Minería de Datos - Estudiantes</p>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a class="nav-link active" onclick="switchTab('dashboard')">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('leakage')">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Leakage y G3=0</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('segmentacion')">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Segmentación</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('clasificacion')">
+                    <i class="fa-solid fa-network-wired"></i>
+                    <span>Clasificación</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('predictor')">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Simulador Predictor</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <p><strong>Examen Unidad 2</strong></p>
+            <p>Estrategias avanzadas de clustering, clasificación y mitigación de leakage.</p>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- HEADER -->
+        <header>
+            <div class="header-title">
+                <h2 id="page-title">Dashboard de Rendimiento</h2>
+                <p id="page-subtitle">Monitoreo general de datos y métricas académicas de la Unidad 2.</p>
+            </div>
+            <div class="badge-active">
+                Sistema Activo
+            </div>
+        </header>
+
+        <!-- ========================================== -->
+        <!-- TAB 1: DASHBOARD -->
+        <!-- ========================================== -->
+        <div id="dashboard" class="tab-panel active">
+            <div class="grid-3">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Muestra Total Active</h3>
+                        <p>357</p>
+                        <span>Estudiantes regulares</span>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Tasa de Aprobación</h3>
+                        <p>74.2%</p>
+                        <span>265 Estudiantes activos</span>
+                    </div>
+                    <div class="stat-icon" style="color: var(--success);">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Deserción / Abandono</h3>
+                        <p>38</p>
+                        <span>G3 = 0 (Excluidos de ML)</span>
+                    </div>
+                    <div class="stat-icon" style="color: var(--danger);">
+                        <i class="fa-solid fa-user-minus"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-circle-info"></i> Resumen de Negocio y Metodológico</h3>
+                </div>
+                <p class="desc">
+                    El sistema analiza el rendimiento de los estudiantes en la materia de <strong>Matemáticas</strong> basándose en características socioeconómicas, hábitos personales (tiempo de estudio, consumo de alcohol, salidas con amigos) y entorno familiar. Con un enfoque predictivo y de segmentación, este dashboard permite responder a dos preguntas fundamentales:
+                </p>
+                <ul class="list-details">
+                    <li><strong>¿Qué caracteriza a los distintos grupos de estudiantes en el campus?</strong> Respondido en la sección de Segmentación con algoritmos de clustering (K-Means y Jerárquico).</li>
+                    <li><strong>¿Podemos predecir con alta precisión el riesgo de reprobación de un estudiante?</strong> Respondido en la sección de Clasificación usando Árboles de Decisión y Random Forest balanceados.</li>
+                </ul>
+                <div class="alert-info alert-box">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <div>
+                        <strong>Estrategia de Examen:</strong> Para asegurar la robustez de los modelos, se aplicó un preprocesamiento riguroso eliminando las notas intermedias G1 y G2 (fuga de datos), compensando el desbalance de clases con penalización de pesos <i>class_weight='balanced'</i> y filtrando la deserción escolar para no viciar las predicciones.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: DATA LEAKAGE Y ABANDONO (G3 = 0) -->
+        <!-- ========================================== -->
+        <div id="leakage" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-triangle-exclamation"></i> Hallazgo Crítico 1: Alerta de Data Leakage por Estudiantes Compartidos</h3>
+                </div>
+                <div class="flex-container">
+                    <div class="flex-col">
+                        <p class="desc">
+                            Se detectó que el archivo de Matemáticas (student-mat.csv) y Portugués (student-por.csv) <strong>comparten exactamente 383 estudiantes en común</strong> (el mismo alumno tomó ambos cursos).
+                        </p>
+                        <div class="alert-danger alert-box">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <div>
+                                <strong>Peligro de Data Leakage:</strong> Si fusionáramos ambos datasets indiscriminadamente y aplicáramos una partición aleatoria simple de Train/Test, los datos socioeconómicos de un mismo estudiante estarían en el grupo de entrenamiento (p.ej. versión Matemáticas) y en el grupo de prueba (p.ej. versión Portugués) de forma simultánea. El modelo de clasificación memorizaría el perfil familiar del estudiante en lugar de generalizar, reportando una precisión inflada y ficticia.
+                            </div>
+                        </div>
+                        <ul class="list-details danger-list">
+                            <li><strong>Error común en exámenes:</strong> Mezclar archivos sin agrupar por ID de estudiante, lo que invalida científicamente el análisis.</li>
+                            <li><strong>Solución Implementada:</strong> Modelado estricto e independiente del dataset de Matemáticas para garantizar particiones completamente limpias e imparciales.</li>
+                        </ul>
+                    </div>
+                    <div class="flex-col" style="max-width: 450px;">
+                        <div class="chart-container">
+                            <img src="/static/charts/01_distribucion.png" class="chart-img" alt="Distribución de Notas">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-power-off"></i> Hallazgo Crítico 2: Análisis y Tratamiento de Notas G3 = 0 (Deserción Escolar)</h3>
+                </div>
+                <p class="desc">
+                    El dataset de Matemáticas contiene <strong>38 estudiantes con calificación final G3 = 0</strong>. Al analizar a fondo estas notas mediante minería de datos, encontramos un patrón inequívoco:
+                </p>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Patrón Analizado</th>
+                                <th>Valor Detectado</th>
+                                <th>Interpretación Metodológica</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Calificación G1</td>
+                                <td>G1 > 0 (100% de los 38 alumnos)</td>
+                                <td>Los alumnos iniciaron el curso y rindieron la evaluación parcial 1 con notas promedio.</td>
+                            </tr>
+                            <tr>
+                                <td>Calificación G2</td>
+                                <td>G2 = 0 en su gran mayoría</td>
+                                <td>Fueron dados de baja del sistema oficial, congelando el conteo de inasistencias.</td>
+                            </tr>
+                            <tr>
+                                <td>Ausencias Registradas</td>
+                                <td>Cercano a 0 posterior al cese</td>
+                                <td>Fueron dados de baja del sistema oficial, congelando el conteo de inasistencias.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="desc" style="margin-top: 1.5rem;">
+                    <strong>Tratamiento Académico:</strong> Clasificar a un alumno que abandonó el colegio en la misma categoría que un alumno regular activo que desaprobó el examen con nota 8 distorsiona los patrones del modelo. Sus hábitos de estudio no son la causa del cero, sino su retiro físico. Por ello, <strong>excluimos a los 38 desertores del entrenamiento predictivo académico</strong>, catalogándolos en un reporte independiente de Deserción Escolar para la dirección de la escuela.
+                </p>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: SEGMENTACIÓN (CLUSTERING) -->
+        <!-- ========================================== -->
+        <div id="segmentacion" class="tab-panel">
+            <div class="grid-3" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-bezier-curve"></i> Análisis K-Means y Codo/Silhouette</h3>
+                    </div>
+                    <p class="desc">
+                        Para segmentar los perfiles estudiantiles sin sesgos, escalamos las variables numéricas con <i>StandardScaler</i>. Al evaluar K de 2 a 10, obtuvimos los siguientes resultados:
+                    </p>
+                    <ul class="list-details">
+                        <li><strong>K óptimo sugerido:</strong> K = 2 (mayor índice Silhouette de 0.1537).</li>
+                        <li><strong>Dendrograma Jerárquico:</strong> Usando enlace Ward, el dendrograma muestra un corte ideal en K = 2, ratificando la solidez de la segmentación.</li>
+                    </ul>
+                    <div class="chart-container">
+                        <img src="/static/charts/02_codo_silhouette.png" class="chart-img" alt="Codo y Silhouette">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-sitemap"></i> Dendrograma Jerárquico (Estructura de Árbol)</h3>
+                    </div>
+                    <p class="desc">
+                        El dendrograma jerárquico representa las distancias de Ward entre las observaciones. Confirma la división del alumnado en dos macro-perfiles definidos.
+                    </p>
+                    <div class="chart-container" style="margin-top: 2rem;">
+                        <img src="/static/charts/03_dendrograma.png" class="chart-img" alt="Dendrograma">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-users-gear"></i> Interpretación de Clústeres y Perfiles de Clientes/Estudiantes</h3>
+                </div>
+                <p class="desc">
+                    El mapa de calor de Z-Score y los promedios de variables de los dos clústeres revelan dos identidades estudiantiles marcadamente diferenciadas:
+                </p>
+
+                <div class="profiles-grid">
+                    <!-- PERFIL 1 -->
+                    <div class="profile-card">
+                        <div class="profile-title p1">
+                            <i class="fa-solid fa-beer-mug-empty"></i>
+                            <span>Clúster 0: Perfil Social / Alto Consumo</span>
+                        </div>
+                        <p class="desc" style="font-size: 0.85rem; margin-bottom: 1rem;">
+                            Estudiantes con alta vida social y consumo de alcohol elevado. Tienen riesgo académico moderado-alto.
+                        </p>
+                        <div class="profile-stats">
+                            <div class="profile-stat-item"><span>Edad Promedio</span><span>16.92 años</span></div>
+                            <div class="profile-stat-item"><span>Tiempo de Estudio</span><span>1.67 horas/sem (Bajo)</span></div>
+                            <div class="profile-stat-item"><span>Salidas con Amigos</span><span>3.90 / 5 (Muy Alto)</span></div>
+                            <div class="profile-stat-item"><span>Consumo Alcohol Finde</span><span>3.72 / 5 (Crítico)</span></div>
+                            <div class="profile-stat-item"><span>Faltas Promedio</span><span>8.78 faltas</span></div>
+                            <div class="profile-stat-item"><span>Tasa Aprobación</span><span style="color: var(--danger)">59.0% (Riesgo)</span></div>
+                        </div>
+                    </div>
+
+                    <!-- PERFIL 2 -->
+                    <div class="profile-card">
+                        <div class="profile-title p2">
+                            <i class="fa-solid fa-book-open-reader"></i>
+                            <span>Clúster 1: Perfil Enfocado / Dedicado</span>
+                        </div>
+                        <p class="desc" style="font-size: 0.85rem; margin-bottom: 1rem;">
+                            Estudiantes orientados al estudio, con baja vida social y hábitos de consumo sumamente moderados.
+                        </p>
+                        <div class="profile-stats">
+                            <div class="profile-stat-item"><span>Edad Promedio</span><span>16.53 años</span></div>
+                            <div class="profile-stat-item"><span>Tiempo de Estudio</span><span>2.22 horas/sem (Alto)</span></div>
+                            <div class="profile-stat-item"><span>Salidas con Amigos</span><span>2.71 / 5 (Moderado)</span></div>
+                            <div class="profile-stat-item"><span>Consumo Alcohol Finde</span><span>1.66 / 5 (Muy Bajo)</span></div>
+                            <div class="profile-stat-item"><span>Faltas Promedio</span><span>5.13 faltas</span></div>
+                            <div class="profile-stat-item"><span>Tasa Aprobación</span><span style="color: var(--success)">81.0% (Excelente)</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container" style="margin-top: 2rem;">
+                    <img src="/static/charts/04_perfiles.png" class="chart-img" alt="Mapa de Calor de Perfiles">
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: CLASIFICACIÓN Y EVALUACIÓN -->
+        <!-- ========================================== -->
+        <div id="clasificacion" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-scale-balanced"></i> Tabla Comparativa de Resultados en Test</h3>
+                </div>
+                <p class="desc">
+                    Evaluación imparcial en el conjunto de prueba (Test, 15% de los datos) que nunca vio el modelo durante el entrenamiento. Los modelos clasificadores se ajustaron con pesos de clase balanceados para evitar sesgos debido a la mayoría de estudiantes aprobados:
+                </p>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Modelo Clasificador</th>
+                                <th>Accuracy (Exactitud)</th>
+                                <th>F1-Score</th>
+                                <th>AUC-ROC</th>
+                                <th>Recall (Sensibilidad)</th>
+                                <th>Supera Baseline</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: rgba(255, 255, 255, 0.01);">
+                                <td><strong>Baseline (Dummy Classifier)</strong></td>
+                                <td>74.07%</td>
+                                <td>0.8511</td>
+                                <td>0.5000</td>
+                                <td>1.000</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Árbol de Decisión (depth=4)</strong></td>
+                                <td>68.52%</td>
+                                <td>0.7848</td>
+                                <td>0.5509</td>
+                                <td>0.7750</td>
+                                <td>No (AUC bajo)</td>
+                            </tr>
+                            <tr style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.15);">
+                                <td><strong><i class="fa-solid fa-award" style="color: var(--warning);"></i> Random Forest (150 Árboles)</strong></td>
+                                <td><strong>75.93%</strong></td>
+                                <td><strong>0.8506</strong></td>
+                                <td><strong>0.7607</strong></td>
+                                <td><strong>0.9250</strong></td>
+                                <td><span style="color: var(--success); font-weight: 600;"><i class="fa-solid fa-circle-check"></i> SÍ (AUC superior)</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="desc" style="margin-top: 1.25rem;">
+                    <strong>Interpretación Técnica:</strong> Aunque el Baseline logra un accuracy alto (74.07%) debido a que la gran mayoría de la clase es "Aprobado", su AUC de 0.50 nos dice que es incapaz de discriminar y carece de utilidad práctica. <strong>Random Forest es el modelo ganador</strong>: reporta un excelente <strong>AUC de 0.7607</strong> y un Recall del 92.5%, lo que significa que detecta de forma sobresaliente a los alumnos que sí aprobarán sin descuidar a los reprobados.
+                </p>
+            </div>
+
+            <div class="grid-3" style="grid-template-columns: 1.2fr 1fr; gap: 2rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-chart-line"></i> Curva ROC Comparativa en Test</h3>
+                    </div>
+                    <div class="chart-container">
+                        <img src="/static/charts/07_curva_roc.png" class="chart-img" alt="Curva ROC">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-ranking-star"></i> Importancia de Características (Top 12)</h3>
+                    </div>
+                    <p class="desc" style="font-size: 0.9rem;">
+                        Variables de mayor peso según Random Forest para la predicción de aprobación matemática:
+                    </p>
+                    <div class="chart-container">
+                        <img src="/static/charts/06_importancia_features.png" class="chart-img" alt="Importancia de Variables">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-border-all"></i> Matrices de Confusión comparadas</h3>
+                </div>
+                <p class="desc">
+                    Visualización de los aciertos y tipos de errores cometidos por cada modelo en el conjunto de prueba (Test):
+                </p>
+                <div class="chart-container">
+                    <img src="/static/charts/08_matrices_confusion.png" class="chart-img" alt="Matrices de Confusión">
+                </div>
+                <div style="margin-top: 1.5rem; line-height: 1.6; font-size: 0.95rem; color: var(--text-secondary);">
+                    <p><strong>Explicación gerencial de la Matriz de Random Forest:</strong></p>
+                    <ul class="list-details" style="margin-top: 0.75rem;">
+                        <li><strong>Verdaderos Positivos (Aprobado real predicho Aprobado):</strong> 37 estudiantes identificados con precisión para brindarles continuidad habitual.</li>
+                        <li><strong>Verdaderos Negativos (Reprobado real predicho Reprobado):</strong> 4 estudiantes identificados en riesgo real para alertas escolares.</li>
+                        <li><strong>Falsos Positivos (Error Tipo I - Alumno reprobado predicho como Aprobado):</strong> 10 estudiantes. Representa el costo de no intervenir a un alumno en riesgo.</li>
+                        <li><strong>Falsos Negativos (Error Tipo II - Alumno aprobado predicho como Reprobado):</strong> 3 estudiantes. Representa una falsa alarma académica (costo de tutoría adicional innecesaria, de bajo impacto negativo).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: SIMULADOR PREDICTOR -->
+        <!-- ========================================== -->
+        <div id="predictor" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-calculator"></i> Simulador de Alerta Temprana de Rendimiento Estudiantil</h3>
+                </div>
+                <p class="desc">
+                    Introduce los hábitos y características de un estudiante regular. El modelo óptimo entrenado (Random Forest) analizará sus datos en tiempo real y estimará la probabilidad de aprobación en la asignatura de Matemáticas.
+                </p>
+
+                <form id="predictor-form" onsubmit="submitPrediction(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="failures">Reprobaciones Previas (Failures)</label>
+                            <select id="failures" class="form-control">
+                                <option value="0">0 materias</option>
+                                <option value="1">1 materia</option>
+                                <option value="2">2 materias</option>
+                                <option value="3">3 o más materias</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="studytime">Tiempo de Estudio Semanal</label>
+                            <select id="studytime" class="form-control">
+                                <option value="1">&lt; 2 horas</option>
+                                <option value="2" selected>2 a 5 horas</option>
+                                <option value="3">5 a 10 horas</option>
+                                <option value="4">&gt; 10 horas</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="absences">Ausencias o Faltas totales</label>
+                            <input type="number" id="absences" class="form-control" min="0" max="99" value="2">
+                        </div>
+                        <div class="form-group">
+                            <label for="goout">Salidas con Amigos (Frecuencia)</label>
+                            <select id="goout" class="form-control">
+                                <option value="1">Muy pocas veces</option>
+                                <option value="2">Pocas veces</option>
+                                <option value="3" selected>Regular</option>
+                                <option value="4">Frecuente</option>
+                                <option value="5">Muy frecuente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="Dalc">Consumo Alcohol (Día de semana)</label>
+                            <select id="Dalc" class="form-control">
+                                <option value="1" selected>Nulo / Muy Bajo</option>
+                                <option value="2">Bajo</option>
+                                <option value="3">Moderado</option>
+                                <option value="4">Alto</option>
+                                <option value="5">Muy Alto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="Walc">Consumo Alcohol (Fin de semana)</label>
+                            <select id="Walc" class="form-control">
+                                <option value="1">Nulo / Muy Bajo</option>
+                                <option value="2" selected>Bajo</option>
+                                <option value="3">Moderado</option>
+                                <option value="4">Alto</option>
+                                <option value="5">Muy Alto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="Medu">Educación de la Madre</label>
+                            <select id="Medu" class="form-control">
+                                <option value="0">Ninguna</option>
+                                <option value="1">Primaria Incompleta</option>
+                                <option value="2">Primaria Completa</option>
+                                <option value="3">Secundaria</option>
+                                <option value="4" selected>Educación Superior</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="Fedu">Educación del Padre</label>
+                            <select id="Fedu" class="form-control">
+                                <option value="0">Ninguna</option>
+                                <option value="1">Primaria Incompleta</option>
+                                <option value="2">Primaria Completa</option>
+                                <option value="3" selected>Secundaria</option>
+                                <option value="4">Educación Superior</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="higher">Desea Educación Superior</label>
+                            <select id="higher" class="form-control">
+                                <option value="1" selected>Sí</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="schoolsup">Apoyo Escolar Adicional</label>
+                            <select id="schoolsup" class="form-control">
+                                <option value="0" selected>No</option>
+                                <option value="1">Sí</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="famsup">Apoyo Familiar Educativo</label>
+                            <select id="famsup" class="form-control">
+                                <option value="1" selected>Sí</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="internet">Tiene Internet en Casa</label>
+                            <select id="internet" class="form-control">
+                                <option value="1" selected>Sí</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Calcular Diagnóstico Predictivo</span>
+                    </button>
+                </form>
+
+                <!-- PREDICTION RESULT CONTAINER -->
+                <div class="result-container" id="prediction-result">
+                    <div class="result-header" id="result-header">
+                        <!-- Carga dinámica -->
+                    </div>
+                    <div class="result-body">
+                        <div class="prob-bar-container">
+                            <div class="prob-labels">
+                                <span id="prob-reprobado-label">Reprobación: 0%</span>
+                                <span id="prob-aprobado-label">Aprobación: 0%</span>
+                            </div>
+                            <div class="prob-track">
+                                <div class="prob-fill-reprobado" id="prob-reprobado-fill" style="width: 0%;"></div>
+                                <div class="prob-fill-aprobado" id="prob-aprobado-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="result-summary-text" id="result-text">
+                            <!-- Carga dinámica -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP JAVASCRIPT -->
+    <script>
+        function switchTab(tabId) {
+            // Activar enlace en Sidebar
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Activar Tab Panel
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+
+            // Actualizar Título de Cabecera
+            const titles = {
+                'dashboard': ['Dashboard de Rendimiento', 'Monitoreo general de datos y métricas académicas de la Unidad 2.'],
+                'leakage': ['Data Leakage & Deserción', 'Estudio analítico de estudiantes en común y notas G3 = 0.'],
+                'segmentacion': ['Segmentación de Alumnos', 'Análisis no supervisado de perfiles mediante K-Means y Clustering Jerárquico.'],
+                'clasificacion': ['Modelos de Clasificación', 'Evaluación comparativa de algoritmos, matrices de confusión y curvas ROC.'],
+                'predictor': ['Simulador Predictivo', 'Estimador interactivo de rendimiento estudiantil mediante Random Forest.']
+            };
+
+            document.getElementById('page-title').innerText = titles[tabId][0];
+            document.getElementById('page-subtitle').innerText = titles[tabId][1];
+        }
+
+        async function submitPrediction(event) {
+            event.preventDefault();
+
+            // Recopilar valores del formulario
+            const payload = {
+                failures: parseFloat(document.getElementById('failures').value),
+                studytime: parseFloat(document.getElementById('studytime').value),
+                absences: parseFloat(document.getElementById('absences').value),
+                goout: parseFloat(document.getElementById('goout').value),
+                Dalc: parseFloat(document.getElementById('Dalc').value),
+                Walc: parseFloat(document.getElementById('Walc').value),
+                Medu: parseFloat(document.getElementById('Medu').value),
+                Fedu: parseFloat(document.getElementById('Fedu').value),
+                higher: parseFloat(document.getElementById('higher').value),
+                schoolsup: parseFloat(document.getElementById('schoolsup').value),
+                famsup: parseFloat(document.getElementById('famsup').value),
+                internet: parseFloat(document.getElementById('internet').value),
+                // Valores constantes por defecto para el resto de features para no agobiar en la UI
+                age: 16.0,
+                traveltime: 1.0,
+                paid: 0.0,
+                activities: 1.0,
+                nursery: 1.0,
+                romantic: 0.0,
+                famrel: 4.0,
+                freetime: 3.0,
+                health: 3.0,
+                school_enc: 0.0,
+                sex_enc: 0.0,
+                address_enc: 1.0,
+                famsize_enc: 0.0,
+                Pstatus_enc: 1.0,
+                Mjob_enc: 2.0,
+                Fjob_enc: 2.0,
+                reason_enc: 1.0,
+                guardian_enc: 1.0
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al conectar con la API de predicción');
+                }
+
+                const result = await response.json();
+
+                // Mostrar contenedor
+                const resultContainer = document.getElementById('prediction-result');
+                resultContainer.style.display = 'block';
+
+                // Rellenar cabecera según predicción
+                const header = document.getElementById('result-header');
+                const textContainer = document.getElementById('result-text');
+
+                const percentAprobado = (result.prob_aprobado * 100).toFixed(1);
+                const percentReprobado = (result.prob_reprobado * 100).toFixed(1);
+
+                document.getElementById('prob-aprobado-label').innerText = `Aprobación: ${percentAprobado}%`;
+                document.getElementById('prob-reprobado-label').innerText = `Reprobación: ${percentReprobado}%`;
+
+                // Animación de barra
+                document.getElementById('prob-aprobado-fill').style.width = `${percentAprobado}%`;
+                document.getElementById('prob-reprobado-fill').style.width = `${percentReprobado}%`;
+
+                if (result.prediction === 1) {
+                    header.className = 'result-header success';
+                    header.innerHTML = '<i class="fa-solid fa-circle-check"></i> DIAGNÓSTICO: ESTUDIANTE APROBADO';
+                    textContainer.innerHTML = `
+                        El modelo predice con un <strong>${percentAprobado}%</strong> de probabilidad que el estudiante 
+                        <strong>APROBARÁ</strong> el examen final de matemáticas.<br>
+                        <span style="font-size: 0.85rem; color: var(--text-muted)">
+                            Sus hábitos y entorno familiar demuestran factores protectores que apoyan su aprendizaje regular.
+                        </span>
+                    `;
+                } else {
+                    header.className = 'result-header danger';
+                    header.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> DIAGNÓSTICO: ALUMNO EN RIESGO';
+                    textContainer.innerHTML = `
+                        El modelo predice con un <strong>${percentReprobado}%</strong> de probabilidad que el estudiante 
+                        está en <strong>RIESGO DE REPROBACIÓN</strong>.<br>
+                        <span style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-top: 0.5rem;">
+                            Se recomienda una intervención escolar preventiva. Los factores de riesgo identificados 
+                            (por ejemplo, historial de reprobaciones, inasistencias o bajo tiempo de estudio) comprometen su desempeño.
+                        </span>
+                    `;
+                }
+
+                // Scroll suave al resultado
+                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            } catch (error) {
+                alert('Ocurrió un error al procesar el cálculo de rendimiento: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
